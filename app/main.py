@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, Any
 from app.db import (
     init_db, save_message, get_last_n_messages,
     save_order_example, get_order_by_id,
-    save_products_example, get_product_by_name
+    save_products_example, get_product_by_name, get_all_products
 )
 from app.ollama_client import generate_reply
 from app.tools import call_order_status_tool, call_product_info_tool
@@ -53,6 +53,15 @@ async def chat(req: ChatRequest):
         tool_called = 'order_status'
         bot_reply = call_order_status_tool(order_id, req.message)
 
+    elif 'produk apa saja' in lower or 'daftar produk' in lower or 'list produk' in lower:
+        tool_called = 'product_list'
+        products = get_all_products()
+        if products:
+            names = ', '.join([p['name'] for p in products])
+            bot_reply = f"Produk yang tersedia di toko ini: {names}."
+        else:
+            bot_reply = "Saat ini tidak ada produk yang tersedia."
+
     elif 'produk' in lower or 'kelebihan' in lower or 'informasi produk' in lower:
         # coba ambil nama produk setelah kata 'produk'
         import re
@@ -60,6 +69,13 @@ async def chat(req: ChatRequest):
         product_name = m.group(1) if m else None
         tool_called = 'product_info'
         bot_reply = call_product_info_tool(product_name)
+
+    elif 'garansi' in lower:
+        tool_called = 'warranty_info'
+        bot_reply = (
+            "Semua produk di toko ini bergaransi resmi 1 tahun. "
+            "Klaim garansi bisa dilakukan dengan membawa nota pembelian ke service center resmi."
+        )
 
     else:
         # kalau bukan tool, pakai LLM
@@ -105,6 +121,12 @@ async def get_product(name: str):
     if not product:
         raise HTTPException(status_code=404, detail='Product not found')
     return product
+
+
+@app.get('/products')
+async def list_products():
+    products = get_all_products()
+    return products
 
 
 @app.get('/')

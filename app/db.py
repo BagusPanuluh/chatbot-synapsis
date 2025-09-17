@@ -76,3 +76,11 @@ def get_product_by_name(name: str):
     if not row:
         return None
     return dict(row)
+
+def get_all_products():
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM products')
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]

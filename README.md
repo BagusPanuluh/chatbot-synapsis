@@ -146,4 +146,9 @@ docker rm chatbot ollama
   - Order `1001` → user `u123`, status `Shipped`, ekspedisi `JNE`, ETA `2025-09-18`.
   - Produk: `LaptopA`, `SmartphoneX`, `HeadsetZ`.
 - ETA akan ditambah **+3 hari** saat dijawab chatbot.
-- 
+- Contoh pertanyaan:
+  - "Berikan informasi mengenai garansi"
+  - "Berikan daftar produk yang tersedia"
+  - "Kapan estimasi pesanan 1001 sampai?"
+  - "Apa status pesanan 1001?"
+  - "Apa ekspedisi pesanan 1001"

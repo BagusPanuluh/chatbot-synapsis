@@ -19,10 +19,12 @@ save_order_example()
 # insert example products
 save_products_example()
 
+
 class ChatRequest(BaseModel):
     user_id: str
     message: str
     metadata: Optional[Dict[str, Any]] = None
+
 
 class ChatResponse(BaseModel):
     reply: str
@@ -32,12 +34,14 @@ class ChatResponse(BaseModel):
 
 @app.post('/chat', response_model=ChatResponse)
 async def chat(req: ChatRequest):
+    # save user message
     save_message(req.user_id, 'user', req.message)
 
     tool_called = None
     lower = req.message.lower()
 
     if 'pesanan' in lower:
+        # coba ambil order_id
         order_id = None
         if req.metadata and 'order_id' in req.metadata:
             order_id = req.metadata['order_id']
@@ -47,10 +51,10 @@ async def chat(req: ChatRequest):
             if m:
                 order_id = int(m.group(1))
         tool_called = 'order_status'
-        bot_reply = call_order_status_tool(order_id)
+        bot_reply = call_order_status_tool(order_id, req.message)
 
     elif 'produk' in lower or 'kelebihan' in lower or 'informasi produk' in lower:
-        # detect product name (simplified: word after 'produk')
+        # coba ambil nama produk setelah kata 'produk'
         import re
         m = re.search(r"produk ([a-zA-Z0-9]+)", lower)
         product_name = m.group(1) if m else None
@@ -58,6 +62,7 @@ async def chat(req: ChatRequest):
         bot_reply = call_product_info_tool(product_name)
 
     else:
+        # kalau bukan tool, pakai LLM
         context = get_last_n_messages(req.user_id, n=3)
         prompt = """
 You are a helpful customer support assistant for an online shop. Use the conversation history and the user's message to reply concisely in Indonesian.
@@ -67,14 +72,20 @@ Conversation history:
 
 User: {user_message}
 Assistant:
-""".format(history='\n'.join([f"{m['role']}: {m['content']}" for m in context]), user_message=req.message)
+""".format(
+            history='\n'.join([f"{m['role']}: {m['content']}" for m in context]),
+            user_message=req.message
+        )
 
         try:
             bot_reply = await generate_reply(prompt)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"LLM error: {e}")
 
+    # save bot reply
     save_message(req.user_id, 'assistant', bot_reply)
+
+    # return history (last 10 messages)
     conversation_history = get_last_n_messages(req.user_id, n=10)
 
     return ChatResponse(reply=bot_reply, tool_called=tool_called, conversation_history=conversation_history)

@@ -34,6 +34,6 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- Seed example products
 INSERT OR IGNORE INTO products (name, description) VALUES
-  ('LaptopA', 'Laptop entry-level dengan RAM 8GB dan SSD 256GB.'),
-  ('SmartphoneX', 'Smartphone dengan kamera 108MP dan baterai tahan lama.'),
+  ('LaptopX', 'Laptop entry-level dengan RAM 8GB dan SSD 256GB.'),
+  ('SmartphoneY', 'Smartphone dengan kamera 108MP dan baterai tahan lama.'),
   ('HeadsetZ', 'Headset gaming dengan surround sound dan mikrofon noise-cancelling.');

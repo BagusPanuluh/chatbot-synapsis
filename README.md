@@ -1,6 +1,6 @@
-# Synapsis Chatbot — Customer Support
+# Chatbot — Customer Support
 
-Chatbot customer support untuk challenge **Jr. AI Engineer — PT Synapsis Sinergi Digital**.  
+Chatbot customer support untuk challenge **Jr. AI Engineer**.  
 Dibangun dengan **FastAPI + SQLite + Ollama (LLM)**.
 
 ---
